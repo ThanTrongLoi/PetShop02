@@ -2,7 +2,7 @@ import React from 'react'
 import { View, Text } from 'react-native'
 
 import { createStackNavigator } from '@react-navigation/stack'
-import ModalList from '../../components/listitemcomponents/ModalListGrooming';
+import PetFlatList from './PetFlatList';
 
 
 
@@ -24,7 +24,7 @@ const PetList = () => {
         >
             <PetListStack.Screen
                 name='Pet'
-                component={ModalList}
+                component={PetFlatList}
             />
         </PetListStack.Navigator>
     )

@@ -7,12 +7,25 @@ import Icon from 'react-native-vector-icons/Ionicons'
 
 const TravelBagFlatList = (props) => {
     const data = [
-        { name: 'food/house/toy/travelbag', uri: require('../../assets/groomingpet.png') },
-        { name: 'food/house/toy/travelbag', uri: require('../../assets/groomingpet.png') },
-        { name: 'food/house/toy/travelbag', uri: require('../../assets/groomingpet.png') },
-        { name: 'food/house/toy/travelbag', uri: require('../../assets/groomingpet.png') },
+        { id: '1', name: 'food/house/toy/travelbag', uri: require('../../assets/groomingpet.png'), isFavorite: true },
+        { id: '2', name: 'food/house/toy/travelbag', uri: require('../../assets/groomingpet.png'), isFavorite: true },
+        { id: '3', name: 'food/house/toy/travelbag', uri: require('../../assets/groomingpet.png'), isFavorite: true },
+        { id: '4', name: 'food/house/toy/travelbag', uri: require('../../assets/groomingpet.png'), isFavorite: true },
+        { id: '5', name: 'food/house/toy/travelbag', uri: require('../../assets/groomingpet.png'), isFavorite: true },
+        { id: '6', name: 'food/house/toy/travelbag', uri: require('../../assets/groomingpet.png'), isFavorite: true },
+        { id: '7', name: 'food/house/toy/travelbag', uri: require('../../assets/groomingpet.png'), isFavorite: true },
+        { id: '8', name: 'food/house/toy/travelbag', uri: require('../../assets/groomingpet.png'), isFavorite: true },
     ]
     const [products, setProducts] = useState(data);
+    const Favorite = (id) => {
+        const newProducts = products.map(product => {
+            if (id === product.id) {
+                return { ...product, isFavorite: !product.isFavorite }
+            }
+            return product
+        })
+        setProducts(newProducts)
+    }
     const navigation = useNavigation();
 
     onGOTODETAILTRAVELBAG = () => navigation.navigate('TravelBagsDetail')
@@ -29,7 +42,7 @@ const TravelBagFlatList = (props) => {
                         <View style={styles.box_products}>
                             <TouchableOpacity
                                 style={{ alignItems: 'center' }}
-                                onPress={() => onGOTODETAILFOOD()}
+                                onPress={() => onGOTODETAILTRAVELBAG()}
                             >
                                 <Image style={{ width: 100, height: 100 }} source={item.uri} />
                                 <Text style={styles.products_name}>{item.name}</Text>
@@ -37,13 +50,14 @@ const TravelBagFlatList = (props) => {
                             <View style={styles.box_products_event}>
                                 <TouchableOpacity
                                     style={styles.products_event}
+                                    onPress={() => Favorite(item.id)}
                                 >
-                                    <Icon name='heart' size={40} color={'#fff'} />
+                                    <Icon name={item.isFavorite ? 'heart-outline' : 'heart'} size={40} color={item.isFavorite ? '#000' : 'red'} />
                                 </TouchableOpacity>
                                 <TouchableOpacity
                                     style={styles.products_event}
                                 >
-                                    <Icon name='cart' size={40} color={'#fff'} />
+                                    <Icon name='cart' size={40} color={'#000'} />
                                 </TouchableOpacity>
                             </View>
                         </View>
@@ -90,6 +104,17 @@ const styles = StyleSheet.create({
     box_products_event: {
         flexDirection: 'row',
         backgroundColor: 'red',
+        borderRadius: 40
+    },
+    products_event: {
+        position: 'relative',
+        flex: 1,
+        alignItems: 'center',
+
+    },
+    box_products_event: {
+        flexDirection: 'row',
+        backgroundColor: '#fff',
         borderRadius: 40
     }
 })

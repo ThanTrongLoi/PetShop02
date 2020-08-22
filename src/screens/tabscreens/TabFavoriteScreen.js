@@ -1,14 +1,21 @@
 import React from 'react'
-import { View, Text } from 'react-native'
+import { View, Text, StyleSheet } from 'react-native'
+import FavoriteComponents from '../../components/tabcomponents/FavoriteComponents'
 
 
 const TabFavoriteScreen = () => {
     return (
-        <View>
-            <Text>Favorite</Text>
+        <View style={styles.container}>
+            <FavoriteComponents />
         </View>
     )
 }
 
 export default TabFavoriteScreen
 
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#ff6090'
+    }
+})
