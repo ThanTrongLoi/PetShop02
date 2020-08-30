@@ -1,32 +1,81 @@
-import React, { useState } from 'react'
-import { View, Text, TouchableOpacity, Image, FlatList, StyleSheet } from 'react-native'
+import React, { useState, useEffect } from 'react'
+import { View, Text, TouchableOpacity, Image, FlatList, StyleSheet, Alert } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
 import { ScrollView } from 'react-native-gesture-handler'
 import { DimensionApp } from '../../unit/dimension'
 import Icon from 'react-native-vector-icons/Ionicons'
+import { firebaseApp } from '../../components/DBFirebase/FirebaseConfig'
 
 const FoodFlatList = ({ props, route }) => {
-    const data = [
-        { id: '1', name: 'food/house/toy/travelbag', uri: require('../../assets/groomingpet.png'), isFavorite: true },
-        { id: '2', name: 'food/house/toy/travelbag', uri: require('../../assets/groomingpet.png'), isFavorite: true },
-        { id: '3', name: 'food/house/toy/travelbag', uri: require('../../assets/groomingpet.png'), isFavorite: true },
-        { id: '4', name: 'food/house/toy/travelbag', uri: require('../../assets/groomingpet.png'), isFavorite: true },
-        { id: '5', name: 'food/house/toy/travelbag', uri: require('../../assets/groomingpet.png'), isFavorite: true },
-        { id: '6', name: 'food/house/toy/travelbag', uri: require('../../assets/groomingpet.png'), isFavorite: true },
-        { id: '7', name: 'food/house/toy/travelbag', uri: require('../../assets/groomingpet.png'), isFavorite: true },
-        { id: '8', name: 'food/house/toy/travelbag', uri: require('../../assets/groomingpet.png'), isFavorite: true },
-    ]
-    const [products, setProducts] = useState(data);
+    // const data = [
+    //     { id: '1', name: 'food/house/toy/travelbag', uri: require('../../assets/groomingpet.png'), isFavorite: true },
+    //     { id: '2', name: 'food/house/toy/travelbag', uri: require('../../assets/groomingpet.png'), isFavorite: true },
+    //     { id: '3', name: 'food/house/toy/travelbag', uri: require('../../assets/groomingpet.png'), isFavorite: true },
+    //     { id: '4', name: 'food/house/toy/travelbag', uri: require('../../assets/groomingpet.png'), isFavorite: true },
+    //     { id: '5', name: 'food/house/toy/travelbag', uri: require('../../assets/groomingpet.png'), isFavorite: true },
+    //     { id: '6', name: 'food/house/toy/travelbag', uri: require('../../assets/groomingpet.png'), isFavorite: true },
+    //     { id: '7', name: 'food/house/toy/travelbag', uri: require('../../assets/groomingpet.png'), isFavorite: true },
+    //     { id: '8', name: 'food/house/toy/travelbag', uri: require('../../assets/groomingpet.png'), isFavorite: true },
+    // ]
+    const itemRef = firebaseApp.database();
 
-    const Favorite = (id) => {
+    const [products, setProducts] = useState([]);
+    const [toggle, setToggle] = useState(true)
+
+    const listenForItems = (itemRef) => {
+        let items = []
+        itemRef.ref('PetShop')
+            .child('Food')
+            .on('child_added', (snap) => {
+                items.push({
+                    name: (snap.val() && snap.val().name),
+                    isFavorite: snap.val() && snap.val().isFavorite,
+                    isCart: (snap.val() && snap.val().isCart),
+                    key: snap.key,
+                    quantity: (snap.val() && snap.val().quantity) || '...',
+                    price: (snap.val() && snap.val().price) || '...'
+                });
+                setProducts(items)
+            })
+    }
+    useEffect(() => {
+        listenForItems(itemRef)
+    }, [])
+    // add favorite product to favorites
+    const Favorite = (key) => {
         const newProducts = products.map(product => {
-            if (id === product.id) {
+            if (key === product.key) {
+                itemRef.ref('PetShop')
+                    .child('Favorite')
+                    .push({
+                        nameFavorite: product.name,
+                    })
+                Alert.alert('Confirm Dialog', 'Add ' + product.name + ' to Favorites Success')
                 return { ...product, isFavorite: !product.isFavorite }
             }
             return product
         })
         setProducts(newProducts)
     }
+    // add product to cart
+    const Cart = (key) => {
+        const newProducts = products.map(product => {
+            if (key === product.key) {
+                itemRef.ref('PetShop')
+                    .child('Cart')
+                    .push({
+                        nameCart: product.name,
+                        quantityCart: 1,
+                        priceCart: product.price
+                    })
+                Alert.alert('Confirm Dialog', 'Add ' + product.name + ' to Cart Success')
+                return { ...product }
+            }
+            return product
+        })
+        setProducts(newProducts)
+    }
+
     const navigation = useNavigation();
 
     onGOTODETAILFOOD = () => navigation.navigate('FoodsDetail')
@@ -45,18 +94,19 @@ const FoodFlatList = ({ props, route }) => {
                                 style={{ alignItems: 'center' }}
                                 onPress={() => onGOTODETAILFOOD()}
                             >
-                                <Image style={{ width: 100, height: 100 }} source={item.uri} />
+                                <Image style={{ width: 100, height: 100 }} source={require('../../assets/foodpet.png')} />
                                 <Text style={styles.products_name}>{item.name}</Text>
                             </TouchableOpacity>
                             <View style={styles.box_products_event}>
                                 <TouchableOpacity
                                     style={styles.products_event}
-                                    onPress={() => Favorite(item.id)}
+                                    onPress={() => { Favorite(item.key) }}
                                 >
                                     <Icon name={item.isFavorite ? 'heart-outline' : 'heart'} size={40} color={item.isFavorite ? '#000' : 'red'} />
                                 </TouchableOpacity>
                                 <TouchableOpacity
                                     style={styles.products_event}
+                                    onPress={() => Cart(item.key)}
                                 >
                                     <Icon name='cart' size={40} color={'#000'} />
                                 </TouchableOpacity>
@@ -83,7 +133,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#ffab91',
         margin: 10,
         paddingHorizontal: 5,
-        marginVertical: 20,
+        marginVertical: 25,
         borderRadius: 16,
         height: DimensionApp.getHEIGHT() / 5.5,
         shadowColor: '#222',
@@ -95,10 +145,10 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 20,
         fontWeight: 'bold',
-        marginVertical: 5,
+        marginBottom: 40
     },
     products_event: {
-        position: 'relative',
+        // position: 'relative',
         flex: 1,
         alignItems: 'center',
 
@@ -106,6 +156,8 @@ const styles = StyleSheet.create({
     box_products_event: {
         flexDirection: 'row',
         backgroundColor: '#fff',
-        borderRadius: 40
+        borderRadius: 40,
+        position: 'absolute',
+        bottom: -20
     }
 })

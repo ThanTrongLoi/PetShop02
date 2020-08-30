@@ -1,43 +1,79 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
     View,
     Text,
     StyleSheet,
     ScrollView,
     FlatList,
-    Image, TouchableOpacity
+    Image,
+    TouchableOpacity,
+    Alert
 } from 'react-native'
 import Icon from 'react-native-vector-icons/Fontisto'
 import Ionicon from 'react-native-vector-icons/Ionicons'
 import { DimensionApp } from '../../unit/dimension'
+import { firebaseApp } from '../../components/DBFirebase/FirebaseConfig'
 const PetFlatList = () => {
-    const data = [
-        { id: '1', name: 'Dog3', kind: 'Dog', origin: 'China', age: '3 years', isGen: true, uri: require('../../assets/dog3.png'), isFavorite: true },
-        { id: '2', name: 'Dog3', kind: 'Dog', origin: 'China', age: '3 years', isGen: false, uri: require('../../assets/dog3.png'), isFavorite: true },
-        { id: '3', name: 'Dog3', kind: 'Dog', origin: 'China', age: '3 years', isGen: true, uri: require('../../assets/dog3.png'), isFavorite: true },
-        { id: '4', name: 'Dog3', kind: 'Dog', origin: 'China', age: '3 years', isGen: false, uri: require('../../assets/dog3.png'), isFavorite: true },
-        { id: '5', name: 'Dog3', kind: 'Dog', origin: 'China', age: '3 years', isGen: true, uri: require('../../assets/dog3.png'), isFavorite: true },
-        { id: '6', name: 'Dog3', kind: 'Dog', origin: 'China', age: '3 years', isGen: true, uri: require('../../assets/dog3.png'), isFavorite: true },
-    ]
+    const itemRef = firebaseApp.database();
+    const [products, setProducts] = useState([])
 
-    const [products, setProducts] = useState(data)
+    const listenForItems = (itemRef) => {
+        let items = []
+        itemRef.ref('PetShop')
+            .child('Pet')
+            .on('child_added', dataSnapShot => {
+                items.push({
+                    key: dataSnapShot.key,
+                    name: dataSnapShot.val() && dataSnapShot.val().name,
+                    age: dataSnapShot.val() && dataSnapShot.val().age,
+                    origin: dataSnapShot.val() && dataSnapShot.val().origin,
+                    kind: dataSnapShot.val() && dataSnapShot.val().kind,
+                    isCart: dataSnapShot.val() && dataSnapShot.val().isCart,
+                    isFavorite: dataSnapShot.val() && dataSnapShot.val().isFavorite,
+                    isGender: dataSnapShot.val() && dataSnapShot.val().isGender,
+                    price: dataSnapShot.val() && dataSnapShot.val().pricem,
+                    quantity: dataSnapShot.val() && dataSnapShot.val().quantity
+                })
+                setProducts(items)
+            })
+    }
 
-    const Favorite = (id) => {
+    useEffect(() => {
+        listenForItems(itemRef)
+    }, [])
+    const Favorite = (key) => {
         const newProducts = products.map(product => {
-            if (id === product.id) {
+            if (key === product.key) {
+                itemRef.ref('PetShop')
+                    .child('Favorite')
+                    .push({
+                        nameFavorite: product.name,
+                    })
+                Alert.alert('Confirm Dialog', 'Add ' + product.name + ' to Favorites Success')
                 return { ...product, isFavorite: !product.isFavorite }
             }
             return product
         })
         setProducts(newProducts)
     }
-
-    // const Gen = (id)=>{
+    //s
+    // const Cart = (key) => {
     //     const newProducts = products.map(product => {
-
+    //         if (key === product.key) {
+    //             itemRef.ref('PetShop')
+    //                 .child('Cart')
+    //                 .push({
+    //                     nameCart: product.name,
+    //                     quantityCart: 1,
+    //                     priceCart: product.price
+    //                 })
+    //             Alert.alert('Confirm Dialog', 'Add ' + product.name + ' to Cart Success')
+    //             return { ...product }
+    //         }
+    //         return product
     //     })
+    //     setProducts(newProducts)
     // }
-
     return (
         <ScrollView style={styles.container}>
             <FlatList
@@ -48,32 +84,31 @@ const PetFlatList = () => {
                     return (
                         <View style={styles.box}>
                             <View style={styles.box_img}>
-                                <Image style={styles.box_img_view} source={item.uri} />
+                                <Image style={styles.box_img_view} source={require('../../assets/dog3.png')} />
                             </View>
                             <View style={styles.box_info}>
                                 <View style={styles.info_header}>
-                                    <Text style={styles.dog_name}>DOG3</Text>
-                                    <Icon name={item.isGen ? 'mars' : 'venus'} size={20} />
+                                    <Text style={styles.dog_name}>{item.name}</Text>
+                                    <Icon name={item.isGender ? 'mars' : 'venus'} size={20} />
                                 </View>
                                 <View style={styles.dog_origin}>
-                                    <Text style={{ fontSize: 20 }}>Origin: </Text>
-                                    <Text style={{ fontSize: 20 }}>{item.origin}</Text>
+                                    <Text style={{ fontSize: 20 }}>Origin: {item.origin}</Text>
                                 </View>
                                 <View style={styles.dog_age}>
-                                    <Text style={{ fontSize: 20 }}>Age: </Text>
-                                    <Text style={{ fontSize: 20 }}>{item.age}</Text>
+                                    <Text style={{ fontSize: 20 }}>Age: {item.age}</Text>
                                 </View>
                                 <View style={styles.dog_kind}>
-                                    <Text style={{ fontSize: 20 }}>Kind: </Text>
-                                    <Text style={{ fontSize: 20 }}>{item.abc}</Text>
+                                    <Text style={{ fontSize: 20 }}>Kind: {item.kind}</Text>
                                 </View>
                                 <View style={styles.dog_icon}>
                                     <TouchableOpacity
-                                        onPress={() => Favorite(item.id)}
+                                        onPress={() => Favorite(item.key)}
                                     >
                                         <Ionicon name={item.isFavorite ? 'heart-outline' : 'heart'} size={26} color={item.isFavorite ? '#000' : 'red'} />
                                     </TouchableOpacity>
-                                    <TouchableOpacity>
+                                    <TouchableOpacity
+                                        onPress={() => Cart(item.key)}
+                                    >
                                         <Ionicon name={'cart'} size={26} />
                                     </TouchableOpacity>
                                 </View>
@@ -114,32 +149,29 @@ const styles = StyleSheet.create({
     box_info: {
         flex: 2 / 4,
         backgroundColor: '#ffccbc',
-        height: DimensionApp.getHEIGHT() / 5.5,
+        height: DimensionApp.getHEIGHT() / 5,
         borderTopEndRadius: 20,
         borderBottomEndRadius: 20,
-
+        padding: 10
     },
     info_header: {
-        flex: 1,
         flexDirection: 'row',
         justifyContent: 'space-between',
-        padding: 10,
     },
     dog_name: {
-        fontSize: 25,
+        fontSize: 20,
         fontWeight: 'bold',
 
     },
-    dog_origin: {
-        flexDirection: 'row'
-    },
-    dog_age: {
-        flexDirection: 'row'
-    },
-    dog_kind: {
-        flex: 1,
-        flexDirection: 'row'
-    },
+    // dog_origin: {
+    //     flexDirection: 'row'
+    // },
+    // dog_age: {
+    //     flexDirection: 'row'
+    // },
+    // dog_kind: {
+    //     flexDirection: 'row'
+    // },
     dog_icon: {
         flexDirection: 'row',
         justifyContent: 'space-around',

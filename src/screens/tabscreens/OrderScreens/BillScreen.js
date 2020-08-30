@@ -4,7 +4,7 @@ import { View, Text } from 'react-native'
 const BillScreen = () => {
     return (
         <View>
-            <Text></Text>
+            <Text>BillScreen</Text>
         </View>
     )
 }

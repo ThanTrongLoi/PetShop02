@@ -19,6 +19,11 @@ import HouseList from './screens/ScreensHouse/HouseList'
 import TravelBagList from './screens/ScreensTravelBag/TravelBagList'
 import PetList from './screens/ScreensPet/PetList'
 import PetsDetail from './screens/ScreensPet/PetsDetail'
+import BillScreen from './screens/tabscreens/OrderScreens/BillScreen'
+import CartScreen from './screens/tabscreens/OrderScreens/CartScreen'
+import LoginScreen from './screens/LoginScreens'
+import SignupScreen from './screens/LoginScreens/SignupScreen'
+
 
 // ======================================================================== /
 const Stack = createStackNavigator();
@@ -82,6 +87,22 @@ const MainHomeScreen = () => {
                 <Stack.Screen
                     name='TravelBagList'
                     component={TravelBagList}
+                />
+                <Stack.Screen
+                    name='BillScreen'
+                    component={BillScreen}
+                />
+                <Stack.Screen
+                    name='CartScreen'
+                    component={CartScreen}
+                />
+                <Stack.Screen
+                    name='LoginScreen'
+                    component={LoginScreen}
+                />
+                <Stack.Screen
+                    name='SignupScreen'
+                    component={SignupScreen}
                 />
             </Stack.Navigator>
         </NavigationContainer>

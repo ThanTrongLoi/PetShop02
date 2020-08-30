@@ -1,29 +1,82 @@
-import React from 'react'
-import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native'
+import React, { useState, useEffect } from 'react'
+import {
+    View,
+    Text,
+    StyleSheet,
+    Image,
+    TouchableOpacity,
+    FlatList,
+    ScrollView
+} from 'react-native'
 import { DimensionApp } from '../../unit/dimension'
-import { ScrollView } from 'react-native-gesture-handler'
+import { firebaseApp } from '../DBFirebase/FirebaseConfig'
 
 
 const ModalList = () => {
-    return (
-        <ScrollView style={styles.container}>
-            <TouchableOpacity style={styles.box_grooming}>
-                <View style={styles.box_img_grooming}>
-                    <Image style={styles.img_grooming} source={require('../../assets/groomingpet.png')} />
-                </View>
-                <View style={styles.box_info_grooming}>
-                    <View style={styles.box_title_grooming}>
-                        <Text style={styles.title_grooming}>
-                            Dịch Vụ Grooming Cắt Tỉa Lông Chó Mèo
-                        </Text>
-                    </View>
-                    <View style={styles.box_description_grooming}>
-                        <Text style={styles.descriptiong_grooming}>
+    const itemRef = firebaseApp.database();
+    const [Lists, setLists] = useState([])
+    const listenForItems = (itemRef) => {
+        let items = []
+        itemRef.ref('PetShop')
+            .child('Service')
+            .on('child_added', snapShot => {
+                items.push({
+                    _key: snapShot.key,
+                    titles: (snapShot.val() && snapShot.val().title) || 'NetWorking...',
+                    details: (snapShot.val() && snapShot.val().detail) || 'NetWorking...',
+                    price: (snapShot.val() && snapShot.val().price),
+                    contact: (snapShot.val() && snapShot.val().contact)
+                })
+                setLists(items)
+            })
+    }
+    useEffect(() => {
+        listenForItems(itemRef)
+    }, [])
 
-                        </Text>
-                    </View>
-                </View>
-            </TouchableOpacity>
+
+    return (
+        <ScrollView
+            style={styles.container}
+            showsVerticalScrollIndicator={false}
+        >
+            <FlatList
+                data={Lists}
+                extraData={Lists}
+                keyExtractor={(item, index) => index.toString()}
+                renderItem={({ item }) => {
+                    return (
+                        <TouchableOpacity
+                            style={styles.box_grooming}
+                            onPress={() => { }}
+                        >
+                            <View style={styles.box_img_grooming}>
+                                <Image style={styles.img_grooming} source={require('../../assets/groomingpet.png')} />
+                            </View>
+                            <View style={styles.box_info_grooming}>
+                                <View style={styles.box_info_grooming}>
+                                    <View style={styles.box_title_grooming}>
+                                        <Text style={styles.title_grooming}>
+                                            {item.titles}
+                                        </Text>
+                                    </View>
+                                    <View style={styles.box_description_grooming}>
+                                        <Text style={styles.descriptiong_grooming}>
+                                            {item.details}
+                                        </Text>
+                                    </View>
+                                    <View>
+                                        <Text style={{ fontSize: 16, fontWeight: 'bold' }}>Price: {item.price}</Text>
+
+                                        <Text style={{ fontSize: 16, fontWeight: 'bold' }}>Contact: {item.contact}</Text>
+                                    </View>
+                                </View>
+                            </View>
+                        </TouchableOpacity>
+
+                    )
+                }}
+            />
         </ScrollView>
     )
 }
@@ -46,7 +99,8 @@ const styles = StyleSheet.create({
         shadowColor: '#222',
         shadowOffset: { width: 0, height: 0 },
         shadowOpacity: 0.6,
-        shadowRadius: 12
+        shadowRadius: 12,
+        marginVertical: 10
     },
     box_img_grooming: {
         flex: 1 / 3,
@@ -60,9 +114,10 @@ const styles = StyleSheet.create({
     },
     box_info_grooming: {
         flex: 2 / 3,
+        padding: 5
     },
     box_title_grooming: {
-        flex: 1 / 3,
+        // flex: 1,
         justifyContent: 'center',
         alignItems: 'center'
     },
@@ -71,10 +126,4 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: '#fff'
     },
-    box_description_grooming: {
-
-    },
-    descriptiong_grooming: {
-
-    }
 })

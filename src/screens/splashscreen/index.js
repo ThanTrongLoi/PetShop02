@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
-import { View, Text, StyleSheet } from 'react-native'
-
+import { View, Text, StyleSheet, Image } from 'react-native'
+import { DimensionApp } from '../../unit/dimension'
 import { useNavigation } from '@react-navigation/native'
 
 const SplashScreen = () => {
@@ -14,12 +14,17 @@ const SplashScreen = () => {
     const navigation = useNavigation();
 
     const goToScreen = () => {
-        navigation.navigate('MainTabScreen')
+        navigation.navigate('LoginScreen')
     }
 
     return (
         <View style={styles.container}>
-            <Text>SPLASHSCREEN</Text>
+            <Image style={{
+                width: DimensionApp.getWIDTH() - 10,
+                height: DimensionApp.getWIDTH() - 10
+            }}
+                source={require('../../assets/logo.png')}
+            />
         </View>
     )
 }
@@ -29,7 +34,7 @@ export default SplashScreen
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: 'red',
+        backgroundColor: '#4db6ac',
         justifyContent: 'center',
         alignItems: 'center'
     }
